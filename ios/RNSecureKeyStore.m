@@ -128,16 +128,6 @@ static NSString *serviceName = @"RNSecureKeyStoreKeyChain";
     }
 }
 
-- (void)handleAppUninstallation
-{
-    NSUserDefaults *groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.io.bluewallet.bluewallet"];
-    if ([self resetOnAppUninstall] && ![groupDefaults boolForKey:@"RnSksIsAppInstalled"]) {
-        [self clearSecureKeyStore];
-        [groupDefaults setBool:YES forKey:@"RnSksIsAppInstalled"];
-        [groupDefaults synchronize];
-    }
-}
-
 NSError * secureKeyStoreError(NSString *errMsg)
 {
     NSError *error = [NSError errorWithDomain:serviceName code:200 userInfo:@{@"reason": errMsg}];
@@ -156,7 +146,6 @@ RCT_EXPORT_METHOD(set: (NSString *)key value:(NSString *)value
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [self handleAppUninstallation];
         BOOL status = [self createKeychainValue: value forIdentifier: key options: options];
         if (status) {
             resolve(@"key stored successfully");
@@ -181,7 +170,6 @@ RCT_EXPORT_METHOD(get:(NSString *)key
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        [self handleAppUninstallation];
         NSString *value = [self searchKeychainCopyMatching:key];
         if (value == nil) {
             NSString* errorMessage = @"{\"message\":\"key does not present\"}";
